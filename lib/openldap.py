@@ -10,6 +10,7 @@ class LDAP:
     #based on input, create a new connection to that database
     def __init__(self):
         settings = ConfigParser.ConfigParser()
+        self.valid_connection = True
         settings.read('./assets/auth/auth.ini')
         self.ldaphost = settings.get('ldap','host')
         self.ldapbind = settings.get('ldap','User')
@@ -19,6 +20,7 @@ class LDAP:
             self.cn = ldap.initialize(self.ldaphost)
             self.cn.simple_bind_s(self.ldapbind, self.ldappw)
         except ldap.INVALID_CREDENTIALS as exc:
+            self.valid_connection = False
             print exc
 
 

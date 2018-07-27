@@ -1,7 +1,9 @@
 __author__ = 'romanovsky'
 
 import sys
-import datetime
+from datetime import datetime
+import logging
+
 from time import strftime
 
 from lib.database import Database
@@ -10,7 +12,9 @@ from lib.vassar_email import VassarEmail
 
 fall_term = '201803'
 spring_term = '201901'
-m = VassarEmail()
+logging.basicConfig(filename='./log/course-enrollment-sync.log',level=logging.DEBUG)
+
+VassarEmail.send('Starting LDAP/Course Sync', '')
 
 #Banner Oracle Database
 db = Database("oracle")
@@ -18,20 +22,25 @@ if hasattr(db, 'cn'):
     print ("database connect")
 else:
     print ("no database connection", db.error)
-    m.send('no oracle connection')
+    VassarEmail.send('ERROR: LDAP/Course Sync', 'no oracle connection')
     sys.exit()
 
 #ldap.vassar.edu
 ldap = LDAP()
 #print(ldap.__dict__)
-if hasattr(ldap,'cn'):
+
+#if hasattr(ldap,'cn'):
+if ldap.valid_connection:
     print ("ldap connect")
 else:
     print ("no ldap connection")
+    logging.debug('no ldap connection: '+str(datetime.now()) )
     sys.exit()
 
 
-#Enrollment::Courses
+##
+## Enrollment::Courses
+##
 new_courses = db.course(fall_term, 'new')
 
 for res in new_courses:
@@ -43,6 +52,9 @@ for res in new_courses:
     dn = 'cn='+str(res[0])+',ou=courses,ou=groups,dc=vassar,dc=edu'
 
     ldap.add(dn, attrs)
+
+    ## Enrollment::Course::Faculty
+    
 
 ldap.close()
 db.close()
