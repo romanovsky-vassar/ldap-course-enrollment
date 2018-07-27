@@ -13,7 +13,7 @@ class VassarEmail:
         simplemail.Email(
         smtp_server = "localhost",
         from_address = "noreply@vassar.edu",
-        to_address = "romanovsky@vassar.edu, mark.romanovsky@gmail.com",
+        to_address = "romanovsky@vassar.edu",
         subject = subj,
         message = mess
         ).send()
