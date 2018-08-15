@@ -2,7 +2,7 @@ __author__ = 'romanovsky'
 
 import sys
 from datetime import datetime
-
+from datetime import timedelta
 from time import strftime
 
 from lib.database import Database
@@ -12,7 +12,7 @@ from lib.vassar_email import VassarEmail
 fall_term = '201803'
 spring_term = '201901'
 
-start_time = '27-JUL-2018 20:00:00'
+start_time = (datetime.now() - timedelta(minutes=10)).strftime('%d-%b-%Y %H:%M:%S').upper()
 
 #Banner Oracle Database
 db = Database("oracle")
@@ -65,18 +65,42 @@ for res in new_courses:
 ##
 course_enrollments = db.enrollment(fall_term, start_time)
 for res in course_enrollments:
-    dn = 'cn='+str(res[0])+',ou=courses,ou=groups,dc=vassar,dc=edu'
-    attr = 'uniqueMember'
-    value = 'uid='+res[1]+',ou=people,dc=vassar,dc=edu'
+    # Course
+    dn_course = 'cn='+str(res[0])+',ou=courses,ou=groups,dc=vassar,dc=edu'
+    attr_course = 'uniqueMember'
+    value_course = 'uid='+res[1]+',ou=people,dc=vassar,dc=edu'
+
+    # Person
+    dn_person = 'uid='+res[1]+',ou=people,dc=vassar,dc=edu'
+    attr_person1 = 'vassarPersonClasses'
+    value_person1 = res[0]
+    attr_person2 = 'vassarPersonGroups'
+    value_person2 = 'cn='+str(res[0])+',ou=courses,ou=groups,dc=vassar,dc=edu'
 
     if res[2].strip() in ['add']:
-        ldap.modify(dn, attr, value, 'ADD')
+        # Do they already exist as a member of this course:
+        res_cn = ldap.search(dn,'(uniqueMember='+value_course+')','cn')
+        if res_cn:
+            db.crosslistreserve('add', value_course, res[0])
+        else:
+            ldap.modify(dn_course, attr_course, value_course, 'ADD')
+            ldap.modify(dn_person, attr_person1, value_person1, 'ADD')
+            ldap.modify(dn_person, attr_person2, value_person2, 'ADD')
+
     if res[2].strip() in ['drop']:
-        ldap.modify(dn, attr, value, 'DELETE')
+        # Is this drop in holding:
+        res_crosslist = db.crosslistsearch(value_course, res[0])
+        print res_crosslist
+
+        if res_crosslist:
+            db.crosslistreserve('remove', value_course, res[0])
+        else:
+            ldap.modify(dn_course, attr_course, value_course, 'DELETE')
+            ldap.modify(dn_person, attr_person1, value_person1, 'DELETE')
+            ldap.modify(dn_person, attr_person2, value_person2, 'DELETE')
+
+
+#res_cn = ldap.search('cn=MATH-241-01-2018A,ou=courses,ou=groups,dc=vassar,dc=edu','(uniqueMember=uid=isfurman,ou=people,dc=vassar,dc=edu)','uniqueMember')
 
 ldap.close()
 db.close()
-
-
-
-#ldap.search('ou=people,dc=vassar,dc=edu','(uid=romanovsky)','cn')

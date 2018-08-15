@@ -30,8 +30,8 @@ class LDAP:
             print exc
 
 
-    def search(self, base_dn, search, returning_attr):
-        print self.cn.search_s(base_dn, ldap.SCOPE_SUBTREE, search, ['cn'])
+    def search(self, base_dn, search, attr_return):
+        return self.cn.search_s(base_dn, ldap.SCOPE_SUBTREE, search, [attr_return])
 
     def add(self, dn, attrs):
         ldif = modlist.addModlist(attrs)

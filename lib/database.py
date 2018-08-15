@@ -67,7 +67,7 @@ class Database:
         except cx_Oracle.DatabaseError as exc:
             error, = exc.args
             self.error = error.message
-            logging.debug('Call Oracle Procedure Fail - VASSAR_IAM.get_new_courses - '+str(datetime.now()) )
+            logging.debug('Call Oracle Procedure Fail - VASSAR_IAM.get_course_faculty - '+str(datetime.now()) )
             VassarEmail.send('LDAPError - Course Enrollment Sync', self.error)
 
         return self.course_faculty
@@ -90,6 +90,37 @@ class Database:
 
         return self.course_enrollments
 
+    def crosslistreserve(self, action, uid, course_label):
+        self.c1 = self.cn.cursor()
+
+
+        if action == 'add':
+            param = {"1" : uid, "2" : course_label, "3" : str(datetime.now()) }
+            try:
+                self.c1.execute("INSERT INTO LDAPDATA.ADD_DROP_XLIST(UUID, COURSE_LABEL, ACT_DATE) values (:1, :2, :3)", param)
+                self.cn.commit()
+            except cx_Oracle.DatabaseError as exc:
+                error, = exc.args
+                self.error = error.message
+                logging.debug('INSERT Error - LDAPDATA.ADD_DROP_XLIST - '+str(datetime.now()) )
+                VassarEmail.send('LDAPError - Course Enrollment Sync', self.error)
+
+        if action == 'remove':
+            param = {"1" : uid, "2" : course_label}
+            self.c1.execute("DELETE FROM LDAPDATA.ADD_DROP_XLIST WHERE UUID = :1 and COURSE_LABEL = :2", param)
+            self.cn.commit()
+
+        self.c1.close()
+
+
+    def crosslistsearch(self, uid, course_label):
+        self.c1 = self.cn.cursor()
+        param = {"1" : uid, "2" : course_label}
+
+        self.c1.execute("SELECT UUID FROM LDAPDATA.ADD_DROP_XLIST WHERE UUID = :1 and COURSE_LABEL = :2", param)
+        res = self.c1.fetchone()
+
+        return res
 
     #close the database connection
     def close(self):
