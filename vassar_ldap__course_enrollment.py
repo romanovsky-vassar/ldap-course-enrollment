@@ -79,7 +79,7 @@ for res in course_enrollments:
 
     if res[2].strip() in ['add']:
         # Do they already exist as a member of this course:
-        res_cn = ldap.search(dn,'(uniqueMember='+value_course+')','cn')
+        res_cn = ldap.search(dn_course,'(uniqueMember='+value_course+')','cn')
         if res_cn:
             db.crosslistreserve('add', value_course, res[0])
         else:
@@ -90,7 +90,6 @@ for res in course_enrollments:
     if res[2].strip() in ['drop']:
         # Is this drop in holding:
         res_crosslist = db.crosslistsearch(value_course, res[0])
-        print res_crosslist
 
         if res_crosslist:
             db.crosslistreserve('remove', value_course, res[0])
