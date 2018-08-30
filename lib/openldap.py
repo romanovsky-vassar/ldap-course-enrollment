@@ -9,7 +9,7 @@ from datetime import datetime
 
 from lib.vassar_email import VassarEmail
 
-logging.basicConfig(filename='./log/course-enrollment-sync.log',level=logging.DEBUG)
+logging.basicConfig(filename='/home/romanovsky/devel/python-project/ldap_student_course/log/course-enrollment-sync.log',level=logging.DEBUG)
 
 class LDAP:
 
@@ -17,7 +17,7 @@ class LDAP:
     def __init__(self):
         settings = ConfigParser.ConfigParser()
         self.valid_connection = True
-        settings.read('./assets/auth/auth.ini')
+        settings.read('/home/romanovsky/devel/python-project/ldap_student_course/assets/auth/auth.ini')
         self.ldaphost = settings.get('ldap','host')
         self.ldapbind = settings.get('ldap','User')
         self.ldappw = settings.get('ldap','PW')

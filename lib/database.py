@@ -8,7 +8,7 @@ from datetime import datetime
 
 from lib.vassar_email import VassarEmail
 
-logging.basicConfig(filename='./log/course-enrollment-sync.log',level=logging.DEBUG)
+logging.basicConfig(filename='/home/romanovsky/devel/python-project/ldap_student_course/log/course-enrollment-sync.log',level=logging.DEBUG)
 
 class Database:
     valid_database = {"oracle" : "oracle",
@@ -22,7 +22,7 @@ class Database:
             self.error = "invalid database"
         else:
             settings = ConfigParser.ConfigParser()
-            settings.read('./assets/auth/auth.ini')
+            settings.read('/home/romanovsky/devel/python-project/ldap_student_course/assets/auth/auth.ini')
             self.dbuser = settings.get(db,'User')
             self.dbpw = settings.get(db, 'PW')
             self.dbhost = settings.get(db, 'host')
