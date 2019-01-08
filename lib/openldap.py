@@ -31,7 +31,11 @@ class LDAP:
 
 
     def search(self, base_dn, search, attr_return):
-        return self.cn.search_s(base_dn, ldap.SCOPE_SUBTREE, search, [attr_return])
+        try:
+            return self.cn.search_s(base_dn, ldap.SCOPE_SUBTREE, search, [attr_return])
+        except ldap.NO_SUCH_OBJECT as exc:
+            print exc
+            return []
 
     def add(self, dn, attrs):
         ldif = modlist.addModlist(attrs)

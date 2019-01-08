@@ -46,12 +46,12 @@ class Database:
             self.c1 = self.cn.cursor()
             self.course_collection = self.cn.cursor()
             try:
-                self.c1.callproc("VASSAR_IAM.get_new_courses", [start_time,self.course_collection])
+                self.c1.callproc("VASSAR_IAM.get_new_courses_psb", [start_time,self.course_collection])
                 self.c1.close()
             except cx_Oracle.DatabaseError as exc:
                 error, = exc.args
                 self.error = error.message
-                logging.debug('Call Oracle Procedure Fail - VASSAR_IAM.get_new_courses - '+str(datetime.now()) )
+                logging.debug('Call Oracle Procedure Fail - VASSAR_IAM.get_new_courses_psb - '+str(datetime.now()) )
                 VassarEmail.send('LDAPError - Course Enrollment Sync', self.error)
         else:
             return null
@@ -63,12 +63,12 @@ class Database:
         self.c1 = self.cn.cursor()
         self.course_faculty = self.cn.cursor()
         try:
-            self.c1.callproc("VASSAR_IAM.get_course_faculty", [course_label, self.course_faculty])
+            self.c1.callproc("VASSAR_IAM.get_course_faculty_psb", [course_label, self.course_faculty])
             self.c1.close()
         except cx_Oracle.DatabaseError as exc:
             error, = exc.args
             self.error = error.message
-            logging.debug('Call Oracle Procedure Fail - VASSAR_IAM.get_course_faculty - '+str(datetime.now()) )
+            logging.debug('Call Oracle Procedure Fail - VASSAR_IAM.get_course_faculty_psb - '+str(datetime.now()) )
             VassarEmail.send('LDAPError - Course Enrollment Sync', self.error)
 
         return self.course_faculty
@@ -80,12 +80,12 @@ class Database:
         self.course_enrollments = self.cn.cursor()
 
         try:
-            self.c1.callproc("VASSAR_IAM.get_course_enroll_changes", [start_time,self.course_enrollments])
+            self.c1.callproc("VASSAR_IAM.get_course_enroll_changes_psb", [start_time,self.course_enrollments])
             self.c1.close()
         except cx_Oracle.DatabaseError as exc:
             error, = exc.args
             self.error = error.message
-            logging.debug('Call Oracle Procedure Fail - VASSAR_IAM.get_course_enroll_changes - '+str(datetime.now()) )
+            logging.debug('Call Oracle Procedure Fail - VASSAR_IAM.get_course_enroll_changes_psb - '+str(datetime.now()) )
             VassarEmail.send('LDAPError - Course Enrollment Sync', self.error)
             return null
 
